@@ -13,8 +13,13 @@ const Slots = require('../models/Slots');
 //signup
 router.post('/adduser',[
     body('name','Enter a valid name').isLength({min:3}),
-    body('password', 'Password should have atleast 8 characters').isLength({ min: 3 }),
+    body('age', 'Enter valid age').isLength({ min: 1 }),
+    body('mobileno', 'Moblile number should have 10 digits').isLength({ min: 10 }),
+    body('city', 'city should have at least 2 characters').isLength({ min: 2}),
+    body('state', 'state should have at least 2 characters').isLength({ min: 2}),
+    body('password', 'Password should have atleast 3 characters').isLength({ min: 3 }),
     body('email','Enter valid email').isEmail()
+    
 ],async (req,res)=>{
     let answer = 0;
     let success  = false;
@@ -26,9 +31,14 @@ router.post('/adduser',[
     }
     try{
     let user = await User.findOne({email:req.body.email});
+    let userwithmob = await User.findOne({mobileno:req.body.mobileno});
     if(user){
         answer = 2;
         return res.status(400).json({answer,success,error:"sorry user with this email exits"})
+    }
+    if(userwithmob){
+        answer = 3;
+        return res.status(400).json({answer,success,error:"sorry user with this mobile no exits"})
     }
     console.log(req.body);
     const salt = bcrypt.genSaltSync(10);
@@ -36,6 +46,10 @@ router.post('/adduser',[
     console.log(req.body);
     user = await User.create({
         name:req.body.name,
+        age:req.body.age,
+        mobileno : req.body.mobileno ,
+        city:req.body.city,
+        state:req.body.state,
         email:req.body.email,
         password:securedPassword}
     )
@@ -51,7 +65,7 @@ router.post('/adduser',[
     catch(err){
         return res.status(500).json({error:err})
     }
-})
+}) 
 
 //login
 router.post("/loginuser", [
@@ -124,6 +138,7 @@ router.post('/displaybookedslot',fetchuser,async (request,response)=>{
 })
 
 
+
 //apply for slot
 router.put('/applyforslot/:id/:value',fetchuser,async (req,res)=>{
     try {
@@ -165,6 +180,14 @@ router.put('/applyforslot/:id/:value',fetchuser,async (req,res)=>{
         res.status(500).send('Internal Server Error');
       }
     
+})
+router.delete('/deleteaccount',fetchuser,async(req,res)=>{
+    try {
+        let deleteuser = await User.findByIdAndDelete(req.user.id);
+        res.json({msg:"Account deleted"});
+    } catch (error) {
+        res.status(500).send(error);
+    }
 })
 router.delete('/deletebookedslots/:id',async (req,res)=>{
     try{

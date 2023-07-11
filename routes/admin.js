@@ -1,11 +1,13 @@
 const express = require('express');
 const Admin = require("../models/Admin")
 const VCSchema = require("../models/VaccinationCenter");
+const Slots = require("../models/Slots")
 const router = express.Router();
 const JWT_SECRET = 'DivanshSignature'
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const {body,validationResult} = require('express-validator');
+const User = require('../models/User');
 
 //adding admin
 router.post('/addadmin',[
@@ -127,5 +129,39 @@ router.delete("/deletecenter/:id",async (request,response)=>{
         response.status(500).json(error);
     }
 })
+
+router.post('/displayallbookedslot',async (request,response)=>{
+    // try{
+        const arr=[];
+    let bookedslot = await Slots.find();
+    if(bookedslot.length==0)
+    return response.json({msg:"No slots booked"});
+    else{
+        let r = await bookedslot.map(async (items)=>{
+            let findinguser = await User.findById(items.user);
+            console.log(findinguser);
+            // arr.push(items);
+            const details = {
+                user:findinguser.name,
+                // placeofuser:findinguser.place,
+                // cityofuser:findinguser.city,
+                // bookeddate:items.slotdate,
+                bookedplace:items.place,
+                bookedname:items.name
+            };
+            arr.push(details);
+            console.log(arr);
+            // response.send(arr);
+        })
+        response.send(arr);
+        console.log(arr);
+    }
+    // }
+    // catch(error){
+    //     response.status(500).json(error);
+    // }
+})
+
+
 
 module.exports = router;

@@ -7,8 +7,8 @@ app.use(express.json())
 app.use('/auth/user',require("./routes/user"));
 app.use('/auth/admin',require("./routes/admin"));
 app.get('/',(req,res)=>{
-    console.log("hello");
-    res.send("hello")
+    console.log("hi");
+    res.send("welcome to Vaccination Booking app")
 })
 app.listen(5000);
 connectToMongo
